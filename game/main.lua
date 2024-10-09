@@ -4,8 +4,12 @@ function love.load()
 		height = 32,
 	}
 
-	nx = 10
-	ny = 10
+	nx = 200
+	ny = 200
+
+	tx = 0
+	ty = 0
+	tscale = 1
 
 	t_step = 0.1
 	step_progress = 0
@@ -20,6 +24,7 @@ function love.load()
 	end
 
 	is_playing = false
+	is_outline = true
 end
 
 local function next_step()
@@ -42,9 +47,9 @@ local function next_step()
 		local row = {}
 		for xi = 1, ny do
 			local c_n = count_nearest(xi, yi)
-			
+
 			local state = (c_n == 3 or (tilemap[yi][xi] and c_n == 2))
-			
+
 			-- if c_n > 1 then
 			-- 	print(c_n)
 			-- end
@@ -70,18 +75,23 @@ function love.update(dt)
 end
 
 function love.draw()
+	love.graphics.print(tostring(love.timer.getFPS()))
+	love.graphics.print(string.format("%.2f", step_progress), 0, 10)
+	love.graphics.print(string.format("%s", t_step), 0, 20)
+
+	love.graphics.translate(tx, ty)
+	love.graphics.scale(tscale, tscale)
+
 	for yi = 1, nx do
 		for xi = 1, ny do
 			local fill_mode = tilemap[yi][xi] and "fill" or "line"
-
-			love.graphics.rectangle(fill_mode, tile.width * xi, tile.height * yi, tile.width, tile.height)
+			
+			if not(fill_mode == "line" and not is_outline) then
+				love.graphics.rectangle(fill_mode, tile.width * xi, tile.height * yi, tile.width, tile.height)
+			end
 		end
 	end
 
-
-	love.graphics.print(tostring(love.timer.getFPS()))
-	
-	love.graphics.print(string.format("%.2f", step_progress), 0 ,10)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -89,8 +99,8 @@ function love.mousepressed(x, y, button, istouch, presses)
 		return
 	end
 
-	local xi = math.floor(x / tile.width)
-	local yi = math.floor(y / tile.height)
+	local xi = math.floor((x - tx) / tile.width / tscale)
+	local yi = math.floor((y - ty) / tile.height/ tscale)
 
 	if xi < 1 or xi > nx or yi < 1 or yi > ny then
 		return
@@ -108,6 +118,7 @@ local function clean()
 end
 
 function love.keypressed(key, scancode, isrepeat)
+	-- print(scancode)
 	if scancode == "escape" then
 		love.event.quit()
 	end
@@ -118,5 +129,31 @@ function love.keypressed(key, scancode, isrepeat)
 
 	if scancode == "f1" then
 		clean()
+	end
+
+	if scancode == "left" then
+		tx = tx + 100
+	elseif scancode == "right" then
+		tx = tx - 100
+	elseif scancode == "up" then
+		ty = ty + 100
+	elseif scancode == "down" then
+		ty = ty - 100
+	end
+
+	if scancode == "[" then
+		tscale = tscale / 2
+	elseif scancode == "]" then
+		tscale = tscale * 2
+	end
+
+	if scancode == "o" then
+		is_outline = not is_outline
+	end
+
+	if scancode == "," then
+		t_step = t_step * 2
+	elseif scancode == "." then
+		t_step = t_step / 2
 	end
 end
