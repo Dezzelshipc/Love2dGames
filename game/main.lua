@@ -50,9 +50,6 @@ local function next_step()
 
 			local state = (c_n == 3 or (tilemap[yi][xi] and c_n == 2))
 
-			-- if c_n > 1 then
-			-- 	print(c_n)
-			-- end
 			table.insert(row, state)
 		end
 		table.insert(new_tilemap, row)
@@ -69,7 +66,6 @@ function love.update(dt)
 		if step_progress > t_step then
 			step_progress = 0
 			tilemap = next_step()
-			-- print("---")
 		end
 	end
 end
@@ -118,7 +114,6 @@ local function clean()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-	-- print(scancode)
 	if scancode == "escape" then
 		love.event.quit()
 	end
